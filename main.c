@@ -24,7 +24,8 @@ t_phil  *philosophers_born(char *argv[])
 	current = phils;
 	previous = phils;
 	locks = malloc(sizeof(t_locks));
-	pthread_mutex_init(locks->forks, NULL);
+	pthread_mutex_init(&locks->forks, NULL);
+	pthread_mutex_init(&locks->output, NULL);
 	while (i < ft_atoi(argv[1]))
 	{
 		current->id =  i + 1;
@@ -48,7 +49,7 @@ t_phil  *philosophers_born(char *argv[])
 	return (phils);
 }
 
-void	output(int id, int action)
+void	output(int id, int action, pthread_mutex_t *lock)
 {
 	static struct timeval	start;
 	struct timeval	now;
@@ -58,8 +59,9 @@ void	output(int id, int action)
 		gettimeofday(&start, NULL);
 		return ;
 	}
+	pthread_mutex_lock(lock);
 	gettimeofday(&now, NULL);
-	printf("%ld %d ", (now.tv_usec - start.tv_usec) / 1000, id);
+	printf("%ld %d ", ((now.tv_sec * 1000 + now.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000)), id);
 	if (action == 0)
 		printf("has taken a fork\n");
 	else if (action == 1)
@@ -70,6 +72,7 @@ void	output(int id, int action)
 		printf("is thinking\n");
 	else if (action == 4)
 		printf("died\n");
+	pthread_mutex_unlock(lock);
 }
 
 void	*live_phil(void	*args)
@@ -78,15 +81,15 @@ void	*live_phil(void	*args)
 
 	while (info->n_eat)
 	{
-		manage_forks(-1, 1, info->id, info->locks->forks);
-		output(info->id, 0);
-		manage_forks(-1, -1, info->id, info->locks->forks);
-		output(info->id, 1);
-		usleep(info->tte);
-		manage_forks(1, 0, info->id, info->locks->forks);
-		output(info->id, 2);
-		usleep(info->tts);
-		output(info->id, 3);
+		manage_forks(-1, 1, info->id, &info->locks->forks);
+		output(info->id, 0, &info->locks->output);
+		manage_forks(-1, -1, info->id, &info->locks->forks);
+		output(info->id, 1, &info->locks->output);
+		usleep(info->tte * 1000);
+		manage_forks(1, 0, info->id, &info->locks->forks);
+		output(info->id, 2, &info->locks->output);
+		usleep(info->tts * 1000);
+		output(info->id, 3, &info->locks->output);
 		info->n_eat--;
 	}
 	return (info);
@@ -100,7 +103,7 @@ int main(int argc, char *argv[])
 	if (argc < 5 || argc > 6)
 		return (0);
 	phils = philosophers_born(argv);
-	output(0, -1);
+	output(0, -1, NULL);
 	manage_forks(0, 0, ft_atoi(argv[1]), NULL);
 	tmp = phils;
 	while (phils)

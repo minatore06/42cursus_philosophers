@@ -27,7 +27,8 @@ typedef struct s_fork
 
 typedef struct s_locks
 {
-    pthread_mutex_t *forks;
+    pthread_mutex_t forks;
+    pthread_mutex_t output;
 }t_locks;
 
 typedef struct  s_philosophers
@@ -46,7 +47,7 @@ typedef struct  s_philosophers
 
 int	    ft_atoi(char *str);
 void	*live_phil(void	*args);
-void	output(int id, int action);
+void	output(int id, int action, pthread_mutex_t *lock);
 int	    get_fork(t_fork *forks, int id);
 void	leave_forks(t_fork *forks, int id);
 t_fork	*make_forks(int	n);
