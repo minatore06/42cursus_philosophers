@@ -27,12 +27,13 @@ typedef struct s_fork
 
 typedef struct  s_philosophers
 {
-    int		id;
-    int		ttd;
-    int		tte;
-    int		tts;
-    int		n_eat;
-	void	*next;
+    int		    id;
+    int		    ttd;
+    int		    tte;
+    int		    tts;
+    int		    n_eat;
+    pthread_t   thread;
+	void	    *next;
 }t_phil;
 
 int	ft_atoi(char *str);

@@ -30,6 +30,8 @@ t_phil  *philosophers_born(char *argv[])
 		current->tts = ft_atoi(argv[4]);
 		if (argv[5])
 			current->n_eat = ft_atoi(argv[5]);
+		else
+			current->n_eat = -1;
 		current->next = 0;
 		if (i != 0)
 			previous->next = current;
@@ -70,15 +72,19 @@ void	*live_phil(void	*args)
 {
 	t_phil	*info = (t_phil *)args;
 
-	manage_forks(-1, 1, info->id);
-	output(info->id, 0);
-	manage_forks(-1, -1, info->id);
-	output(info->id, 1);
-	usleep(info->tte);
-	manage_forks(1, 0, info->id);
-	output(info->id, 2);
-	usleep(info->tts);
-	output(info->id, 3);
+	while (info->n_eat)
+	{
+		manage_forks(-1, 1, info->id);
+		output(info->id, 0);
+		manage_forks(-1, -1, info->id);
+		output(info->id, 1);
+		usleep(info->tte);
+		manage_forks(1, 0, info->id);
+		output(info->id, 2);
+		usleep(info->tts);
+		output(info->id, 3);
+		info->n_eat--;
+	}
 }
 
 t_fork	*make_forks(int	n)
@@ -164,15 +170,23 @@ void	manage_forks(int action, int hand, int id)
 int main(int argc, char *argv[])
 {
 	t_phil	*phils;
-	t_fork	*forks;
+	t_phil	*tmp;
 
 	if (argc < 5 || argc > 6)
 		return (0);
 	phils = philosophers_born(argv);
 	output(0, -1);
+	manage_forks(0, 0, ft_atoi(argv[1]));
+	tmp = phils;
 	while (phils)
 	{
-		printf("Philosopher: %d\n", phils->id);
+		pthread_create(&phils->thread, NULL, &live_phil, phils);
+		phils = phils->next;
+	}
+	phils = tmp;
+	while (phils)
+	{
+		pthread_join(phils->thread, NULL);
 		phils = phils->next;
 	}
 	return (0);
