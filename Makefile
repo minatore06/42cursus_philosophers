@@ -2,13 +2,13 @@ CC=gcc
 CFLAGS=-Wall -Wextra -Werror
 NAME=philo
 
-FILES=main.c ft_atoi.c
+FILES=main.c ft_atoi.c forks.c
 OBJECTS=$(FILES:.c=.o)
 
 all: $(NAME)
 
 $(NAME): $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) -o $(NAME)
+	$(CC) $(CFLAGS) $(OBJECTS) -g -o $(NAME) -lpthread
 
 clean:
 	rm -f $(OBJECTS)

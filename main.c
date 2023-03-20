@@ -17,11 +17,14 @@ t_phil  *philosophers_born(char *argv[])
 	t_phil	*phils;
 	t_phil	*current;
 	t_phil	*previous;
+	t_locks	*locks;
 
 	i = 0;
 	phils = malloc(sizeof(t_phil));
 	current = phils;
 	previous = phils;
+	locks = malloc(sizeof(t_locks));
+	pthread_mutex_init(locks->forks, NULL);
 	while (i < ft_atoi(argv[1]))
 	{
 		current->id =  i + 1;
@@ -32,6 +35,7 @@ t_phil  *philosophers_born(char *argv[])
 			current->n_eat = ft_atoi(argv[5]);
 		else
 			current->n_eat = -1;
+		current->locks = locks;
 		current->next = 0;
 		if (i != 0)
 			previous->next = current;
@@ -74,97 +78,18 @@ void	*live_phil(void	*args)
 
 	while (info->n_eat)
 	{
-		manage_forks(-1, 1, info->id);
+		manage_forks(-1, 1, info->id, info->locks->forks);
 		output(info->id, 0);
-		manage_forks(-1, -1, info->id);
+		manage_forks(-1, -1, info->id, info->locks->forks);
 		output(info->id, 1);
 		usleep(info->tte);
-		manage_forks(1, 0, info->id);
+		manage_forks(1, 0, info->id, info->locks->forks);
 		output(info->id, 2);
 		usleep(info->tts);
 		output(info->id, 3);
 		info->n_eat--;
 	}
-}
-
-t_fork	*make_forks(int	n)
-{
-	t_fork	*forks;
-	t_fork	*current;
-	t_fork	*previous;
-	int		i;
-
-	forks = malloc(sizeof(t_fork));
-	current = forks;
-	previous = forks;
-	i = 0;
-	while (i < n)
-	{
-		current->id = i + 1;
-		current->free = 1;
-		current->next = 0;
-		if (i != 0)
-			previous->next = current;
-		if (i != 0)
-			previous = previous->next;
-		current = malloc(sizeof(t_fork));
-		i++;
-	}
-	free(current);
-	return (forks);
-}
-
-int	get_fork(t_fork *forks, int id)
-{
-	while (forks)
-	{
-		if (forks->id == id)
-		{
-			if (forks->free)
-			{
-				forks->free = 0;
-				return (0);
-			}
-			else
-				return (1);
-		}
-		forks = forks->next;
-	}
-}
-
-void	leave_forks(t_fork *forks, int id)
-{
-	while (forks)
-	{
-		if (forks->id == id)
-			forks->free = 1;
-		else if (forks->id == id + 1)
-			forks->free = 1;
-		forks = forks->next;
-	}
-}
-
-void	manage_forks(int action, int hand, int id)
-{
-	static t_fork	*forks;
-
-	if (!hand && !action)
-		forks = make_forks(id);
-	if (action < 0)
-	{
-		if (hand < 0)
-		{
-			get_fork(forks, id + 1);
-		}
-		else if (hand > 0)
-		{
-			get_fork(forks, id);
-		}
-	}
-	else if (action > 0)
-	{
-		leave_forks(forks, id);
-	}
+	return (info);
 }
 
 int main(int argc, char *argv[])
@@ -176,7 +101,7 @@ int main(int argc, char *argv[])
 		return (0);
 	phils = philosophers_born(argv);
 	output(0, -1);
-	manage_forks(0, 0, ft_atoi(argv[1]));
+	manage_forks(0, 0, ft_atoi(argv[1]), NULL);
 	tmp = phils;
 	while (phils)
 	{
