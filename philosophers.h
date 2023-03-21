@@ -38,6 +38,7 @@ typedef struct  s_philosophers
     int		    tte;
     int		    tts;
     int		    n_eat;
+    long int	last_meal;
     pthread_t   thread;
     t_locks     *locks;
 	void	    *next;
@@ -46,9 +47,10 @@ typedef struct  s_philosophers
 
 
 int	    ft_atoi(char *str);
+t_fork  *get_next(t_fork *lst, t_fork *el);
 void	*live_phil(void	*args);
 void	output(int id, int action, pthread_mutex_t *lock);
-int	    get_fork(t_fork *forks, int id);
+int	    get_fork(t_fork *forks, int id, int has_fork);
 void	leave_forks(t_fork *forks, int id);
 t_fork	*make_forks(int	n);
 void	manage_forks(int action, int hand, int id, pthread_mutex_t *lock);
