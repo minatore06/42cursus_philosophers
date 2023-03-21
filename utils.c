@@ -6,3 +6,15 @@ t_fork  *get_next(t_fork *lst, t_fork *el)
         return (el->next);
     return (lst);
 }
+
+int last_id(t_fork *lst)
+{
+    int id;
+
+    while (lst)
+    {
+        id = lst->id;
+        lst = lst->next;
+    }
+    return (id);
+}

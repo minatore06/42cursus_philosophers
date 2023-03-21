@@ -31,6 +31,12 @@ typedef struct s_locks
     pthread_mutex_t output;
 }t_locks;
 
+typedef struct  s_info
+{
+    t_locks     *locks;
+    int         dead;
+}t_info;
+
 typedef struct  s_philosophers
 {
     int		    id;
@@ -40,13 +46,14 @@ typedef struct  s_philosophers
     int		    n_eat;
     long int	last_meal;
     pthread_t   thread;
-    t_locks     *locks;
+    t_info      *common;
 	void	    *next;
 }t_phil;
 
 
 
 int	    ft_atoi(char *str);
+int     last_id(t_fork *lst);
 t_fork  *get_next(t_fork *lst, t_fork *el);
 void	*live_phil(void	*args);
 void	output(int id, int action, pthread_mutex_t *lock);

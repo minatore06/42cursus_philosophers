@@ -18,6 +18,7 @@ t_phil  *philosophers_born(char *argv[])
 	t_phil	*current;
 	t_phil	*previous;
 	t_locks	*locks;
+	t_info	*common;
 
 	i = 0;
 	phils = malloc(sizeof(t_phil));
@@ -26,6 +27,9 @@ t_phil  *philosophers_born(char *argv[])
 	locks = malloc(sizeof(t_locks));
 	pthread_mutex_init(&locks->forks, NULL);
 	pthread_mutex_init(&locks->output, NULL);
+	common = malloc(sizeof(t_info));
+	common->locks = locks;
+	common->dead = 0;
 	while (i < ft_atoi(argv[1]))
 	{
 		current->id =  i + 1;
@@ -36,7 +40,7 @@ t_phil  *philosophers_born(char *argv[])
 			current->n_eat = ft_atoi(argv[5]);
 		else
 			current->n_eat = -1;
-		current->locks = locks;
+		current->common = common;
 		current->next = 0;
 		if (i != 0)
 			previous->next = current;
@@ -49,10 +53,12 @@ t_phil  *philosophers_born(char *argv[])
 	return (phils);
 }
 
-int	is_dead(long int last_meal, int ttd, int shift)
+int	is_dead(long int last_meal, int ttd, int shift, int dead)
 {
 	struct timeval	now;
 
+	if (dead)
+		return (-1);
 	gettimeofday(&now, NULL);
 	if ((now.tv_sec * 1000 + now.tv_usec / 1000) - last_meal + shift >= ttd)
 		return (1);
@@ -92,31 +98,34 @@ void	*live_phil(void	*args)
 
 	gettimeofday(&last_meal, NULL);
 	info->last_meal = last_meal.tv_sec * 1000 + last_meal.tv_usec / 1000;
-	while (info->n_eat)
+	while (!info->common->dead)
 	{
-		if (is_dead(info->last_meal, info->ttd, 0))
+		if (is_dead(info->last_meal, info->ttd, 0, info->common->dead))
 			break ;
-		manage_forks(-1, 1, info->id, &info->locks->forks);
-		if (is_dead(info->last_meal, info->ttd, 0))
+		manage_forks(-1, 1, info->id, &info->common->locks->forks);
+		if (is_dead(info->last_meal, info->ttd, 0, info->common->dead))
 			break ;
-		output(info->id, 0, &info->locks->output);
-		manage_forks(-1, -1, info->id, &info->locks->forks);
-/* 		if (is_dead(info->last_meal, info->ttd, info->tte))
-			break ; */
-		output(info->id, 1, &info->locks->output);
+		output(info->id, 0, &info->common->locks->output);
+		manage_forks(-1, -1, info->id, &info->common->locks->forks);
+ 		if (is_dead(info->last_meal, info->ttd, info->tte, info->common->dead))
+			break ;
+		output(info->id, 1, &info->common->locks->output);
 		usleep(info->tte * 1000);
 		gettimeofday(&last_meal, NULL);
 		info->last_meal = last_meal.tv_sec * 1000 + last_meal.tv_usec / 1000;
-		manage_forks(1, 0, info->id, &info->locks->forks);
-		if (is_dead(info->last_meal, info->ttd, info->tts))
+		manage_forks(1, 0, info->id, &info->common->locks->forks);
+		if (is_dead(info->last_meal, info->ttd, info->tts, info->common->dead))
 			break ;
-		output(info->id, 2, &info->locks->output);
+		output(info->id, 2, &info->common->locks->output);
 		usleep(info->tts * 1000);
-		output(info->id, 3, &info->locks->output);
+		output(info->id, 3, &info->common->locks->output);
 		info->n_eat--;
 	}
 	if (info->n_eat)
-		output(info->id, 4, &info->locks->output);
+	{
+		output(info->id, 4, &info->common->locks->output);
+		info->common->dead = 1;
+	}
 	return (info);
 }
 
