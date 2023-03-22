@@ -27,6 +27,22 @@ t_fork	*make_forks(int	n)
 	return (forks);
 }
 
+int	last_fork(t_fork *forks)
+{
+	int	count;
+
+	count = 0;
+	while (forks)
+	{
+		if (forks->free)
+			count++;
+		forks = forks->next;
+	}
+	if (count == 1)
+		return (1);
+	return (0);
+}
+
 void	print_forks(t_fork *forks)
 {
 	while (forks)
@@ -47,7 +63,8 @@ int	get_fork(t_fork *forks, int id, int has_fork)
 	{
 		if (fork->id == id)
 		{
-			if (!has_fork && !get_next(forks, fork)->free)
+			//if (!has_fork && !get_next(forks, fork)->free)
+			if (last_fork(forks) && !has_fork)
 				return (1);
 			if (fork->free)
 			{
@@ -87,7 +104,7 @@ void	leave_forks(t_fork *forks, int id)
 		forks->free = 1;
 }
 
-void	manage_forks(int action, int hand, int id, pthread_mutex_t *lock)
+int	manage_forks(int action, int hand, int id, pthread_mutex_t *lock)
 {
 	static t_fork	*forks;
     int             free;
@@ -99,21 +116,17 @@ void	manage_forks(int action, int hand, int id, pthread_mutex_t *lock)
 	{
 		if (hand < 0)
 		{
-			while (free)
-            {
-                pthread_mutex_lock(lock);
-                free = get_fork(forks, id + 1, 1);
-                pthread_mutex_unlock(lock);
-            }
+			pthread_mutex_lock(lock);
+			free = get_fork(forks, id + 1, 1);
+			pthread_mutex_unlock(lock);
+			return (free);
 		}
 		else if (hand > 0)
 		{
-			while (free)
-            {
-                pthread_mutex_lock(lock);
-                free = get_fork(forks, id, 0);
-                pthread_mutex_unlock(lock);
-            }
+			pthread_mutex_lock(lock);
+			free = get_fork(forks, id, 0);
+			pthread_mutex_unlock(lock);
+			return (free);
 		}
 	}
 	else if (action > 0)
@@ -122,4 +135,5 @@ void	manage_forks(int action, int hand, int id, pthread_mutex_t *lock)
 		leave_forks(forks, id);
         pthread_mutex_unlock(lock);
 	}
+	return (0);
 }

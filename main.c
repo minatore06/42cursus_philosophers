@@ -37,9 +37,9 @@ t_phil  *philosophers_born(char *argv[])
 		current->tte = ft_atoi(argv[3]);
 		current->tts = ft_atoi(argv[4]);
 		if (argv[5])
-			current->n_eat = ft_atoi(argv[5]);
+			current->n_eat = -ft_atoi(argv[5]);
 		else
-			current->n_eat = -1;
+			current->n_eat = 1;
 		current->common = common;
 		current->next = 0;
 		if (i != 0)
@@ -53,19 +53,24 @@ t_phil  *philosophers_born(char *argv[])
 	return (phils);
 }
 
-int	is_dead(long int last_meal, int ttd, int shift, int dead)
+int	is_dead(long int last_meal, int ttd, int shift, t_phil *phil)
 {
 	struct timeval	now;
 
-	if (dead)
+	if (phil->common->dead)
 		return (-1);
 	gettimeofday(&now, NULL);
 	if ((now.tv_sec * 1000 + now.tv_usec / 1000) - last_meal + shift >= ttd)
+	{
+		usleep((ttd - ((now.tv_sec * 1000 + now.tv_usec / 1000) - last_meal)) * 1000);
+		output(phil->id, 4, phil->common);
+		phil->common->dead = 1;
 		return (1);
+	}
 	return (0);
 }
 
-void	output(int id, int action, pthread_mutex_t *lock)
+void	output(int id, int action, t_info *info)
 {
 	static struct timeval	start;
 	struct timeval	now;
@@ -75,57 +80,62 @@ void	output(int id, int action, pthread_mutex_t *lock)
 		gettimeofday(&start, NULL);
 		return ;
 	}
-	pthread_mutex_lock(lock);
-	gettimeofday(&now, NULL);
-	printf("%ld %d ", ((now.tv_sec * 1000 + now.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000)), id);
-	if (action == 0)
-		printf("has taken a fork\n");
-	else if (action == 1)
-		printf("is eating\n");
-	else if (action == 2)
-		printf("is sleeping\n");
-	else if (action == 3)
-		printf("is thinking\n");
-	else if (action == 4)
-		printf("died\n");
-	pthread_mutex_unlock(lock);
+	pthread_mutex_lock(&info->locks->output);
+	if (!info->dead)
+	{
+		gettimeofday(&now, NULL);
+		printf("%ld %d ", ((now.tv_sec * 1000 + now.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000)), id);
+		if (action == 0)
+			printf("has taken a fork\n");
+		else if (action == 1)
+			printf("is eating\n");
+		else if (action == 2)
+			printf("is sleeping\n");
+		else if (action == 3)
+			printf("is thinking\n");
+		else if (action == 4)
+			printf("died💀💀💀\n");
+	}
+	pthread_mutex_unlock(&info->locks->output);
 }
 
 void	*live_phil(void	*args)
 {
-	t_phil	*info = (t_phil *)args;
+	t_phil			*info = (t_phil *)args;
 	struct timeval	last_meal;
 
 	gettimeofday(&last_meal, NULL);
 	info->last_meal = last_meal.tv_sec * 1000 + last_meal.tv_usec / 1000;
 	while (!info->common->dead)
 	{
-		if (is_dead(info->last_meal, info->ttd, 0, info->common->dead))
-			break ;
-		manage_forks(-1, 1, info->id, &info->common->locks->forks);
-		if (is_dead(info->last_meal, info->ttd, 0, info->common->dead))
-			break ;
-		output(info->id, 0, &info->common->locks->output);
-		manage_forks(-1, -1, info->id, &info->common->locks->forks);
- 		if (is_dead(info->last_meal, info->ttd, info->tte, info->common->dead))
-			break ;
-		output(info->id, 1, &info->common->locks->output);
+		if (is_dead(info->last_meal, info->ttd, 0, info))
+			return (info);
+		while (manage_forks(-1, 1, info->id, &info->common->locks->forks))
+		{
+			if (is_dead(info->last_meal, info->ttd, 0, info))
+				return (info);
+		}
+		output(info->id, 0, info->common);
+		info->n_eat++;
+		while (manage_forks(-1, -1, info->id, &info->common->locks->forks))
+		{
+			if (is_dead(info->last_meal, info->ttd, info->tte, info))
+				return (info);
+		}
+		output(info->id, 1, info->common);
 		usleep(info->tte * 1000);
 		gettimeofday(&last_meal, NULL);
 		info->last_meal = last_meal.tv_sec * 1000 + last_meal.tv_usec / 1000;
 		manage_forks(1, 0, info->id, &info->common->locks->forks);
-		if (is_dead(info->last_meal, info->ttd, info->tts, info->common->dead))
-			break ;
-		output(info->id, 2, &info->common->locks->output);
+		if (is_dead(info->last_meal, info->ttd, info->tts, info))
+			return (info);
+		output(info->id, 2, info->common);
 		usleep(info->tts * 1000);
-		output(info->id, 3, &info->common->locks->output);
-		info->n_eat--;
+		if (is_dead(info->last_meal, info->ttd, info->tts, info))
+			return (info);
+		output(info->id, 3, info->common);
 	}
-	if (info->n_eat)
-	{
-		output(info->id, 4, &info->common->locks->output);
-		info->common->dead = 1;
-	}
+	//manage_forks(1, 0, info->id, &info->common->locks->forks);
 	return (info);
 }
 
@@ -149,6 +159,7 @@ int main(int argc, char *argv[])
 	while (phils)
 	{
 		pthread_join(phils->thread, NULL);
+		printf("Phil %d is dead!!!!!!!!!!!!!!!!!!!!!!!\n", phils->id);
 		phils = phils->next;
 	}
 	return (0);
