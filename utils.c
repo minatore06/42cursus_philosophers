@@ -18,3 +18,21 @@ int last_id(t_fork *lst)
     }
     return (id);
 }
+
+t_phil *last_member(t_phil *lst)
+{
+    while (lst->next)
+        lst = lst->next;
+    return (lst);
+}
+
+t_phil *bfr_this(t_phil *lst, t_phil *this)
+{
+    while (lst)
+    {
+        if (lst->next == this)
+            break;
+        lst = lst->next;
+    }
+    return (lst);
+}

@@ -150,10 +150,11 @@ int main(int argc, char *argv[])
 	output(0, -1, NULL);
 	manage_forks(0, 0, ft_atoi(argv[1]), NULL);
 	tmp = phils;
+	phils = last_member(phils);
 	while (phils)
 	{
 		pthread_create(&phils->thread, NULL, &live_phil, phils);
-		phils = phils->next;
+		phils = bfr_this(tmp, phils);
 	}
 	phils = tmp;
 	while (phils)

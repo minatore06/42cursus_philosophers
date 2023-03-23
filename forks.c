@@ -63,8 +63,9 @@ int	get_fork(t_fork *forks, int id, int has_fork)
 	{
 		if (fork->id == id)
 		{
-			//if (!has_fork && !get_next(forks, fork)->free)
 			if (last_fork(forks) && !has_fork)
+				return (1);
+			if (!has_fork && !get_next(forks, fork)->free)
 				return (1);
 			if (fork->free)
 			{
