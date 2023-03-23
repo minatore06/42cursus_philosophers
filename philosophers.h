@@ -21,13 +21,12 @@
 typedef struct s_fork
 {
     int     id;
-    int     free;
+    pthread_mutex_t free;
     void    *next;
 }t_fork;
 
 typedef struct s_locks
 {
-    pthread_mutex_t forks;
     pthread_mutex_t output;
 }t_locks;
 
@@ -62,7 +61,7 @@ void	output(int id, int action, t_info *info);
 int	    get_fork(t_fork *forks, int id, int has_fork);
 void	leave_forks(t_fork *forks, int id);
 t_fork	*make_forks(int	n);
-int 	manage_forks(int action, int hand, int id, pthread_mutex_t *lock);
+int 	manage_forks(int action, int hand, int id);
 t_phil  *philosophers_born(char *argv[]);
 
 #endif
