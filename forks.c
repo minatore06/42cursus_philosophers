@@ -3,22 +3,23 @@
 t_fork	*make_forks(int	n)
 {
 	t_fork	*forks;
-	t_fork	*current;
+	t_fork	*el;
 	int		i;
 
-	forks = malloc(sizeof(t_fork));
-	current = forks;
+	forks = NULL;
 	i = 0;
 	while (i < n)
 	{
-
-		pthread_mutex_init(&current->free, NULL);
-		current->id = i + 1;
-		current->next = malloc(sizeof(t_fork));
-		current = current->next;
+		el = malloc(sizeof(t_fork));
+		el->free = 1;
+		pthread_mutex_init(&el->lock, NULL);
+		el->id = i + 1;
+		if (!forks)
+			forks = el;
+		else
+			last_fork(forks)->next = el;
 		i++;
 	}
-	free(current);
 	return (forks);
 }
 

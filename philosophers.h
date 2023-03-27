@@ -21,7 +21,8 @@
 typedef struct s_fork
 {
     int     id;
-    pthread_mutex_t free;
+    int     free;
+    pthread_mutex_t lock;
     void    *next;
 }t_fork;
 
@@ -53,7 +54,8 @@ typedef struct  s_philosophers
 
 int	    ft_atoi(char *str);
 int     last_id(t_fork *lst);
-t_phil *last_member(t_phil *lst);
+t_phil *last_phil(t_phil *lst);
+t_fork *last_fork(t_fork *lst);
 t_phil *bfr_this(t_phil *lst, t_phil *this);
 t_fork  *get_next(t_fork *lst, t_fork *el);
 void	*live_phil(void	*args);

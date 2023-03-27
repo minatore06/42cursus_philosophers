@@ -40,11 +40,10 @@ t_phil  *philosophers_born(char *argv[])
 		else
 			el->n_eat = 1;
 		el->common = common;
-		printf("ses %d\n", i+1);
 		if (!phils)
 			phils = el;
 		else
-			last_member(phils)->next = el;
+			last_phil(phils)->next = el;
 		i++;
 	}
 	return (phils);
@@ -103,23 +102,24 @@ void	*live_phil(void	*args)
 
 	gettimeofday(&last_meal, NULL);
 	info->last_meal = last_meal.tv_sec * 1000 + last_meal.tv_usec / 1000;
-	write(1, "culo", 4);
 	while (!info->common->dead)
 	{
 		if (is_dead(info->last_meal, info->ttd, 0, info))
 			return (info);
-		while (manage_forks(-1, 1, info->id))
-		{
-			if (is_dead(info->last_meal, info->ttd, 0, info))
-				return (info);
-		}
+/* 		while ()
+		{ */
+		manage_forks(-1, 1, info->id);
+		if (is_dead(info->last_meal, info->ttd, 0, info))
+			return (info);
+/* 		} */
 		output(info->id, 0, info->common);
 		info->n_eat++;
-		while (manage_forks(-1, -1, info->id))
-		{
-			if (is_dead(info->last_meal, info->ttd, info->tte, info))
-				return (info);
-		}
+/* 		while ()
+		{ */
+		manage_forks(-1, -1, info->id);
+		if (is_dead(info->last_meal, info->ttd, info->tte, info))
+			return (info);
+/* 		} */
 		output(info->id, 1, info->common);
 		usleep(info->tte * 1000);
 		gettimeofday(&last_meal, NULL);
@@ -148,11 +148,9 @@ int main(int argc, char *argv[])
 	output(0, -1, NULL);
 	manage_forks(0, 0, ft_atoi(argv[1]));
 	tmp = phils;
-	printf("sas %d\n", phils->id);
 	//phils = last_member(phils);
 	while (phils)
 	{
-		printf("sos %d\n", phils->id);
 		pthread_create(&phils->thread, NULL, &live_phil, phils);
 		phils = phils->next;//bfr_this(tmp, phils);
 	}

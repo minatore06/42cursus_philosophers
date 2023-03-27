@@ -19,7 +19,14 @@ int last_id(t_fork *lst)
     return (id);
 }
 
-t_phil *last_member(t_phil *lst)
+t_phil *last_phil(t_phil *lst)
+{
+    while (lst->next)
+        lst = lst->next;
+    return (lst);
+}
+
+t_fork *last_fork(t_fork *lst)
 {
     while (lst->next)
         lst = lst->next;
