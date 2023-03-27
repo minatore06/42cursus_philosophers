@@ -48,7 +48,7 @@ t_fork	*make_forks(int	n)
 	}
 } */
 
-int	get_fork(t_fork *forks, int id, int has_fork)
+int	get_fork(t_fork *forks, int id, int has_fork, pthread_mutex_t *lock)
 {
 	t_fork	*fork;
 
@@ -60,11 +60,14 @@ int	get_fork(t_fork *forks, int id, int has_fork)
 	{
 		if (fork->id == id)
 		{
-/* 			if (last_fork(forks) && !has_fork)
+ 			if (last_fork(forks) && !has_fork)
 				return (1);
-			if (!has_fork && !get_next(forks, fork)->free)
+/* 			if (!has_fork && !get_next(forks, fork)->free)
 				return (1); */
-			pthread_mutex_lock(&fork->free);
+			printf("sos\n");
+			pthread_mutex_unlock(lock);
+			pthread_mutex_lock(&fork->lock);
+			fork->free = 0;
 			return (0);
 		}
 		fork = get_next(forks, fork);
@@ -72,7 +75,7 @@ int	get_fork(t_fork *forks, int id, int has_fork)
 	return (1);
 }
 
-void	leave_forks(t_fork *forks, int id)
+void	leave_forks(t_fork *forks, int id, pthread_mutex_t *lock)
 {
 	t_fork	*fork;
 	int		count;
@@ -84,43 +87,45 @@ void	leave_forks(t_fork *forks, int id)
 		if (fork->id == id)
 		{
 			count--;
-			pthread_mutex_unlock(&fork->free);
+			fork->free = 1;
+			pthread_mutex_unlock(&fork->lock);
 		}
 		else if (fork->id == id + 1)
 		{
 			count--;
-			pthread_mutex_unlock(&fork->free);
+			fork->free = 1;
+			pthread_mutex_unlock(&fork->lock);
 		}
 		fork = fork->next;
 	}
 	if (count)
-		pthread_mutex_unlock(&fork->free);
+	{
+		fork->free = 1;
+		pthread_mutex_unlock(&fork->lock);
+	}
+	pthread_mutex_unlock(lock);
 }
 
-int	manage_forks(int action, int hand, int id)
+int	manage_forks(int action, int hand, int id, pthread_mutex_t *lock)
 {
 	static t_fork	*forks;
     int             free;
 
 	if (!hand && !action)
+	{
 		forks = make_forks(id);
+		return (0);
+	}
 	free = 1;
+	pthread_mutex_lock(lock);
 	if (action < 0)
 	{
 		if (hand < 0)
-		{
-			free = get_fork(forks, id + 1, 1);
-			return (free);
-		}
+			free = get_fork(forks, id + 1, 1, lock);
 		else if (hand > 0)
-		{
-			free = get_fork(forks, id, 0);
-			return (free);
-		}
+			free = get_fork(forks, id, 0, lock);
 	}
 	else if (action > 0)
-	{
-		leave_forks(forks, id);
-	}
-	return (0);
+		leave_forks(forks, id, lock);
+	return (free);
 }

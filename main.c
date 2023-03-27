@@ -25,6 +25,7 @@ t_phil  *philosophers_born(char *argv[])
 	phils = NULL;
 	locks = malloc(sizeof(t_locks));
 	pthread_mutex_init(&locks->output, NULL);
+	pthread_mutex_init(&locks->forks, NULL);
 	common = malloc(sizeof(t_info));
 	common->locks = locks;
 	common->dead = 0;
@@ -106,25 +107,23 @@ void	*live_phil(void	*args)
 	{
 		if (is_dead(info->last_meal, info->ttd, 0, info))
 			return (info);
-/* 		while ()
-		{ */
-		manage_forks(-1, 1, info->id);
-		if (is_dead(info->last_meal, info->ttd, 0, info))
-			return (info);
-/* 		} */
+ 		while (manage_forks(-1, 1, info->id, &info->common->locks->forks))
+		{
+			if (is_dead(info->last_meal, info->ttd, 0, info))
+				return (info);
+ 		}
 		output(info->id, 0, info->common);
 		info->n_eat++;
-/* 		while ()
-		{ */
-		manage_forks(-1, -1, info->id);
-		if (is_dead(info->last_meal, info->ttd, info->tte, info))
-			return (info);
-/* 		} */
+		while (manage_forks(-1, -1, info->id, &info->common->locks->forks))
+		{
+			if (is_dead(info->last_meal, info->ttd, info->tte, info))
+				return (info);
+		}
 		output(info->id, 1, info->common);
 		usleep(info->tte * 1000);
 		gettimeofday(&last_meal, NULL);
 		info->last_meal = last_meal.tv_sec * 1000 + last_meal.tv_usec / 1000;
-		manage_forks(1, 0, info->id);
+		manage_forks(1, 0, info->id, &info->common->locks->forks);
 		if (is_dead(info->last_meal, info->ttd, info->tts, info))
 			return (info);
 		output(info->id, 2, info->common);
@@ -146,7 +145,7 @@ int main(int argc, char *argv[])
 		return (0);
 	phils = philosophers_born(argv);
 	output(0, -1, NULL);
-	manage_forks(0, 0, ft_atoi(argv[1]));
+	manage_forks(0, 0, ft_atoi(argv[1]), NULL);
 	tmp = phils;
 	//phils = last_member(phils);
 	while (phils)
