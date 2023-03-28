@@ -96,6 +96,30 @@ void	output(int id, int action, t_info *info)
 	pthread_mutex_unlock(&info->locks->output);
 }
 
+void	*becchino(void *phils)
+{
+	t_phil *phil;
+
+	while (!((t_phil *)phils)->common->dead)
+	{
+		phil = phils;
+		while (phil)
+		{
+			if (is_dead(phil->last_meal, phil->ttd, 0, phil))
+				break ;
+		}
+		
+	}
+	output(phil->id, 4, phil->common);
+	while (((t_phil *)phils)->common->dead)
+	{
+		pthread_mutex_unlock(&((t_phil *)phils)->common->locks->forks);
+		pthread_mutex_unlock(&((t_phil *)phils)->common->locks->output);
+		manage_forks(1, 1, -1, NULL);
+	}
+	return NULL;
+}
+
 void	*live_phil(void	*args)
 {
 	t_phil			*info = (t_phil *)args;
@@ -105,30 +129,32 @@ void	*live_phil(void	*args)
 	info->last_meal = last_meal.tv_sec * 1000 + last_meal.tv_usec / 1000;
 	while (!info->common->dead)
 	{
-		if (is_dead(info->last_meal, info->ttd, 0, info))
+		if (info->common->dead)
 			return (info);
  		while (manage_forks(-1, 1, info->id, &info->common->locks->forks))
 		{
-			if (is_dead(info->last_meal, info->ttd, 0, info))
+			if (info->common->dead)
 				return (info);
  		}
 		output(info->id, 0, info->common);
 		info->n_eat++;
 		while (manage_forks(-1, -1, info->id, &info->common->locks->forks))
 		{
-			if (is_dead(info->last_meal, info->ttd, info->tte, info))
+ 			if (info->common->dead)
 				return (info);
 		}
+		if (is_dead(info->last_meal, info->ttd, info->tte, info))
+			return (info);
 		output(info->id, 1, info->common);
 		usleep(info->tte * 1000);
 		gettimeofday(&last_meal, NULL);
 		info->last_meal = last_meal.tv_sec * 1000 + last_meal.tv_usec / 1000;
 		manage_forks(1, 0, info->id, &info->common->locks->forks);
-		if (is_dead(info->last_meal, info->ttd, info->tts, info))
+		if (info->common->dead)
 			return (info);
 		output(info->id, 2, info->common);
 		usleep(info->tts * 1000);
-		if (is_dead(info->last_meal, info->ttd, info->tts, info))
+		if (info->common->dead)
 			return (info);
 		output(info->id, 3, info->common);
 	}
@@ -140,6 +166,7 @@ int main(int argc, char *argv[])
 {
 	t_phil	*phils;
 	t_phil	*tmp;
+	pthread_t	bcn;
 
 	if (argc < 5 || argc > 6)
 		return (0);
@@ -153,12 +180,20 @@ int main(int argc, char *argv[])
 		pthread_create(&phils->thread, NULL, &live_phil, phils);
 		phils = phils->next;//bfr_this(tmp, phils);
 	}
-	phils = tmp;
+	//phils = tmp;
+	phils = last_phil(tmp);
+	pthread_create(&bcn, NULL, &becchino, phils);
 	while (phils)
 	{
 		pthread_join(phils->thread, NULL);
+		manage_forks(1, 1, -1, NULL);
 		printf("Phil %d is dead!!!!!!!!!!!!!!!!!!!!!!!\n", phils->id);
-		phils = phils->next;
+		phils = bfr_this(tmp, phils);
 	}
+	tmp->common->dead = 0;
+	pthread_join(bcn, NULL);
+	printf("I'm dead!!!!!!!!!!!!!!!!!!!!!!!\n");
+/* 	pthread_mutex_destroy(&phils->common->locks->forks);
+	pthread_mutex_destroy(&phils->common->locks->output); */
 	return (0);
 }

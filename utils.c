@@ -35,11 +35,11 @@ t_fork *last_fork(t_fork *lst)
 
 t_phil *bfr_this(t_phil *lst, t_phil *this)
 {
-    while (lst)
+    while (lst->next)
     {
         if (lst->next == this)
-            break;
+            return (lst);
         lst = lst->next;
     }
-    return (lst);
+    return (NULL);
 }
