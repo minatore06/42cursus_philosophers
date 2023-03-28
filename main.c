@@ -26,6 +26,7 @@ t_phil  *philosophers_born(char *argv[])
 	locks = malloc(sizeof(t_locks));
 	pthread_mutex_init(&locks->output, NULL);
 	pthread_mutex_init(&locks->forks, NULL);
+	pthread_mutex_init(&locks->dead, NULL);
 	common = malloc(sizeof(t_info));
 	common->locks = locks;
 	common->dead = 0;
@@ -61,7 +62,9 @@ int	is_dead(long int last_meal, int ttd, int shift, t_phil *phil)
 	{
 		usleep((ttd - ((now.tv_sec * 1000 + now.tv_usec / 1000) - last_meal)) * 1000);
 		output(phil->id, 4, phil->common);
+		pthread_mutex_lock(&phil->common->locks->dead);
 		phil->common->dead = 1;
+		pthread_mutex_unlock(&phil->common->locks->dead);
 		return (1);
 	}
 	return (0);
@@ -107,16 +110,26 @@ void	*becchino(void *phils)
 		{
 			if (is_dead(phil->last_meal, phil->ttd, 0, phil))
 				break ;
+			phil = phil->next;
 		}
 		
 	}
+	printf("sus\n");
 	output(phil->id, 4, phil->common);
-	while (((t_phil *)phils)->common->dead)
+	phil = phils;
+	while (phil)
+	{
+		phil->tte = 0;
+		phil->tts = 0;
+		phil = phil->next;
+	}
+	
+/* 	while (((t_phil *)phils)->common->dead)
 	{
 		pthread_mutex_unlock(&((t_phil *)phils)->common->locks->forks);
 		pthread_mutex_unlock(&((t_phil *)phils)->common->locks->output);
 		manage_forks(1, 1, -1, NULL);
-	}
+	} */
 	return NULL;
 }
 
@@ -129,33 +142,41 @@ void	*live_phil(void	*args)
 	info->last_meal = last_meal.tv_sec * 1000 + last_meal.tv_usec / 1000;
 	while (!info->common->dead)
 	{
-		if (info->common->dead)
-			return (info);
+		/* if (info->common->dead)
+			return (info); */
  		while (manage_forks(-1, 1, info->id, &info->common->locks->forks))
 		{
-			if (info->common->dead)
+			/* if (info->common->dead)
+			{
 				return (info);
- 		}
+			} */
+		}
 		output(info->id, 0, info->common);
 		info->n_eat++;
 		while (manage_forks(-1, -1, info->id, &info->common->locks->forks))
 		{
- 			if (info->common->dead)
+ 			/* if (info->common->dead)
+			{
+				manage_forks(1, 0, info->id, &info->common->locks->forks);
 				return (info);
+			} */
 		}
 		if (is_dead(info->last_meal, info->ttd, info->tte, info))
+		{
+			manage_forks(1, 0, info->id, &info->common->locks->forks);
 			return (info);
+		}
 		output(info->id, 1, info->common);
 		usleep(info->tte * 1000);
 		gettimeofday(&last_meal, NULL);
 		info->last_meal = last_meal.tv_sec * 1000 + last_meal.tv_usec / 1000;
 		manage_forks(1, 0, info->id, &info->common->locks->forks);
-		if (info->common->dead)
-			return (info);
+		/* if (info->common->dead)
+			return (info); */
 		output(info->id, 2, info->common);
 		usleep(info->tts * 1000);
-		if (info->common->dead)
-			return (info);
+		/* if (info->common->dead)
+			return (info); */
 		output(info->id, 3, info->common);
 	}
 	//manage_forks(1, 0, info->id, &info->common->locks->forks);
@@ -190,7 +211,7 @@ int main(int argc, char *argv[])
 		printf("Phil %d is dead!!!!!!!!!!!!!!!!!!!!!!!\n", phils->id);
 		phils = bfr_this(tmp, phils);
 	}
-	tmp->common->dead = 0;
+	//tmp->common->dead = 0;
 	pthread_join(bcn, NULL);
 	printf("I'm dead!!!!!!!!!!!!!!!!!!!!!!!\n");
 /* 	pthread_mutex_destroy(&phils->common->locks->forks);

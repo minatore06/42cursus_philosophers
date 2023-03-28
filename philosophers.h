@@ -30,6 +30,7 @@ typedef struct s_locks
 {
     pthread_mutex_t output;
     pthread_mutex_t forks;
+    pthread_mutex_t dead;
 }t_locks;
 
 typedef struct  s_info
