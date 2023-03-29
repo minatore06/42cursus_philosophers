@@ -95,6 +95,7 @@ void	leave_forks(t_fork *forks, int id)
 int	manage_forks(int action, int hand, int id, pthread_mutex_t *lock)
 {
 	static t_fork	*forks;
+	t_fork	*fork;
     int             free;
 
 	if (!hand && !action)
@@ -104,10 +105,12 @@ int	manage_forks(int action, int hand, int id, pthread_mutex_t *lock)
 	}
 	if (id < 0)
 	{
-		while (forks)
+		fork = forks;
+		while (fork)
 		{
-			pthread_mutex_unlock(&forks->lock);
-			forks = forks->next;
+			fork->free = 1;
+			pthread_mutex_unlock(&fork->lock);
+			fork = fork->next;
 		}
 		return (0);
 	}

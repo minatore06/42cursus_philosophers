@@ -112,15 +112,14 @@ void	*becchino(void *phils)
 				break ;
 			phil = phil->next;
 		}
-		
 	}
 	printf("sus\n");
-	output(phil->id, 4, phil->common);
 	phil = phils;
 	while (phil)
 	{
 		phil->tte = 0;
 		phil->tts = 0;
+		phil->ttd = 0;
 		phil = phil->next;
 	}
 	
