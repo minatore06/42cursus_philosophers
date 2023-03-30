@@ -21,16 +21,24 @@ int last_id(t_fork *lst)
 
 t_phil *last_phil(t_phil *lst)
 {
-    while (lst->next)
+    while (lst)
+    {
+        if (!lst->next)
+            return (lst);
         lst = lst->next;
-    return (lst);
+    }
+    return (NULL);
 }
 
 t_fork *last_fork(t_fork *lst)
 {
-    while (lst->next)
+    while (lst)
+    {
+        if (!lst->next)
+            return (lst);
         lst = lst->next;
-    return (lst);
+    }
+    return (NULL);
 }
 
 t_phil *bfr_this(t_phil *lst, t_phil *this)

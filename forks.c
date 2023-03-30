@@ -14,6 +14,7 @@ t_fork	*make_forks(int	n)
 		el->free = 1;
 		pthread_mutex_init(&el->lock, NULL);
 		el->id = i + 1;
+		el->next = NULL;
 		if (!forks)
 			forks = el;
 		else

@@ -37,6 +37,8 @@ t_phil  *philosophers_born(char *argv[])
 		el->ttd = ft_atoi(argv[2]);
 		el->tte = ft_atoi(argv[3]);
 		el->tts = ft_atoi(argv[4]);
+		el->last_meal = 0;
+		el->next = NULL;
 		if (argv[5])
 			el->n_eat = -ft_atoi(argv[5]);
 		else
@@ -160,15 +162,15 @@ void	*live_phil(void	*args)
 				return (info);
 			} */
 		}
-		if (is_dead(info->last_meal, info->ttd, info->tte, info))
+		/* if (is_dead(info->last_meal, info->ttd, info->tte, info))
 		{
 			manage_forks(1, 0, info->id, &info->common->locks->forks);
 			return (info);
-		}
+		} */
 		output(info->id, 1, info->common);
-		usleep(info->tte * 1000);
 		gettimeofday(&last_meal, NULL);
 		info->last_meal = last_meal.tv_sec * 1000 + last_meal.tv_usec / 1000;
+		usleep(info->tte * 1000);
 		manage_forks(1, 0, info->id, &info->common->locks->forks);
 		/* if (info->common->dead)
 			return (info); */
@@ -180,6 +182,23 @@ void	*live_phil(void	*args)
 	}
 	//manage_forks(1, 0, info->id, &info->common->locks->forks);
 	return (info);
+}
+
+void	free_phils(t_phil *phils)
+{
+	t_phil	*phil;
+
+	pthread_mutex_destroy(&phils->common->locks->dead);
+	pthread_mutex_destroy(&phils->common->locks->output);
+	pthread_mutex_destroy(&phils->common->locks->forks);
+	free(phils->common->locks);
+	free(phils->common);
+	phil = last_phil(phils);
+	while (phil)
+	{
+		free(phil);
+		phil = last_phil(phils);
+	}
 }
 
 int main(int argc, char *argv[])
@@ -213,6 +232,7 @@ int main(int argc, char *argv[])
 	//tmp->common->dead = 0;
 	pthread_join(bcn, NULL);
 	printf("I'm dead!!!!!!!!!!!!!!!!!!!!!!!\n");
+	free_phils(tmp);
 /* 	pthread_mutex_destroy(&phils->common->locks->forks);
 	pthread_mutex_destroy(&phils->common->locks->output); */
 	return (0);
