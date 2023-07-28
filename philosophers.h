@@ -53,19 +53,19 @@ typedef struct  s_philosophers
 }t_phil;
 
 
-
-int	    ft_atoi(char *str);
-int     last_id(t_fork *lst);
-t_phil *last_phil(t_phil *lst);
-t_fork *last_fork(t_fork *lst);
-t_phil *bfr_this(t_phil *lst, t_phil *this);
-t_fork  *get_next(t_fork *lst, t_fork *el);
+int		get_dead(int dead, pthread_mutex_t *lock);
+int		ft_atoi(char *str);
+int		last_id(t_fork *lst);
+t_phil	*last_phil(t_phil *lst);
+t_fork	*last_fork(t_fork *lst);
+t_phil	*bfr_this(t_phil *lst, t_phil *this);
+t_fork	*get_next(t_fork *lst, t_fork *el);
 void	*live_phil(void	*args);
 void	output(int id, int action, t_info *info);
-int	    get_fork(t_fork *forks, int id, int has_fork, pthread_mutex_t *lock);
+int		get_fork(t_fork *forks, int id, int has_fork, pthread_mutex_t *lock);
 void	leave_forks(t_fork *forks, int id);
 t_fork	*make_forks(int	n);
 int 	manage_forks(int action, int hand, int id, pthread_mutex_t *lock);
-t_phil  *philosophers_born(char *argv[]);
+t_phil	*philosophers_born(char *argv[]);
 
 #endif

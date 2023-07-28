@@ -53,14 +53,14 @@ t_phil  *philosophers_born(char *argv[])
 	return (phils);
 }
 
-int	is_dead(long int last_meal, int ttd, int shift, t_phil *phil)
+int	is_dead(long int last_meal, int ttd, t_phil *phil)
 {
 	struct timeval	now;
 
-	if (phil->common->dead)
+	if (get_dead(phil->common->dead, &phil->common->locks->dead))
 		return (-1);
 	gettimeofday(&now, NULL);
-	if ((now.tv_sec * 1000 + now.tv_usec / 1000) - last_meal + shift >= ttd)
+	if ((now.tv_sec * 1000 + now.tv_usec / 1000) - last_meal >= ttd)
 	{
 		usleep((ttd - ((now.tv_sec * 1000 + now.tv_usec / 1000) - last_meal)) * 1000);
 		output(phil->id, 4, phil->common);
@@ -83,7 +83,7 @@ void	output(int id, int action, t_info *info)
 		return ;
 	}
 	pthread_mutex_lock(&info->locks->output);
-	if (!info->dead)
+	if (!get_dead(info->dead, &info->locks->dead))
 	{
 		gettimeofday(&now, NULL);
 		printf("%ld %d ", ((now.tv_sec * 1000 + now.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000)), id);
@@ -105,25 +105,26 @@ void	*becchino(void *phils)
 {
 	t_phil *phil;
 
-	while (!((t_phil *)phils)->common->dead)
+	phil = phils;
+	while (!get_dead(phil->common->dead, &phil->common->locks->dead))
 	{
-		phil = phils;
 		while (phil)
 		{
-			if (is_dead(phil->last_meal, phil->ttd, 0, phil))
+			if (is_dead(phil->last_meal, phil->ttd, phil))
 				break ;
 			phil = phil->next;
 		}
+		phil = phils;
 	}
 	printf("sus\n");
-	phil = phils;
+/* 	phil = phils;
 	while (phil)
 	{
 		phil->tte = 0;
 		phil->tts = 0;
 		phil->ttd = 0;
 		phil = phil->next;
-	}
+	} */
 	
 /* 	while (((t_phil *)phils)->common->dead)
 	{
@@ -141,7 +142,7 @@ void	*live_phil(void	*args)
 
 	gettimeofday(&last_meal, NULL);
 	info->last_meal = last_meal.tv_sec * 1000 + last_meal.tv_usec / 1000;
-	while (!info->common->dead)
+	while (!get_dead(info->common->dead, &info->common->locks->dead))
 	{
 		/* if (info->common->dead)
 			return (info); */
@@ -193,11 +194,11 @@ void	free_phils(t_phil *phils)
 	pthread_mutex_destroy(&phils->common->locks->forks);
 	free(phils->common->locks);
 	free(phils->common);
-	phil = last_phil(phils);
-	while (phil)
+	while (phils)
 	{
+		phil = phils;
+		phils = phils->next;
 		free(phil);
-		phil = last_phil(phils);
 	}
 }
 
@@ -225,7 +226,7 @@ int main(int argc, char *argv[])
 	while (phils)
 	{
 		pthread_join(phils->thread, NULL);
-		manage_forks(1, 1, -1, NULL);
+		// manage_forks(1, 1, -1, NULL);
 		printf("Phil %d is dead!!!!!!!!!!!!!!!!!!!!!!!\n", phils->id);
 		phils = bfr_this(tmp, phils);
 	}
