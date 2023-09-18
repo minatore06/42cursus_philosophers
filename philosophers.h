@@ -41,15 +41,17 @@ typedef struct  s_info
 
 typedef struct  s_philosophers
 {
-    int		    id;
-    int		    ttd;
-    int		    tte;
-    int		    tts;
-    int		    n_eat;
-    long int	last_meal;
-    pthread_t   thread;
-    t_info      *common;
-	void	    *next;
+    int				id;
+    int				ttd;
+    int				tte;
+    int				tts;
+    int				n_eat;
+    pthread_mutex_t	n_eat_lock;
+    long int		last_meal;
+    pthread_mutex_t	last_meal_lock;
+    pthread_t		thread;
+    t_info			*common;
+	void			*next;
 }t_phil;
 
 
