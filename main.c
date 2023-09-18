@@ -167,10 +167,10 @@ void	*live_phil(void	*args)
 			return (info); */
  		while (manage_forks(-1, 1, info->id, &info->common->locks->forks))
 		{
-			/* if (info->common->dead)
+			if (get_dead(info->common->dead, &info->common->locks->dead))
 			{
 				return (info);
-			} */
+			}
 		}
 		output(info->id, 0, info->common);
 		pthread_mutex_lock(&info->n_eat_lock);
@@ -179,11 +179,11 @@ void	*live_phil(void	*args)
 		pthread_mutex_unlock(&info->n_eat_lock);
 		while (manage_forks(-1, -1, info->id, &info->common->locks->forks))
 		{
- 			/* if (info->common->dead)
+ 			if (get_dead(info->common->dead, &info->common->locks->dead))
 			{
 				manage_forks(1, 0, info->id, &info->common->locks->forks);
 				return (info);
-			} */
+			}
 		}
 		/* if (is_dead(info->last_meal, info->ttd, info->tte, info))
 		{

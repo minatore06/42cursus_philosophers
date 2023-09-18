@@ -130,6 +130,8 @@ int	manage_forks(int action, int hand, int id, pthread_mutex_t *lock)
 	pthread_mutex_lock(lock);
 	if (action < 0)
 	{
+		if (id > last_id(forks))
+			return (1);
 		if (hand < 0)
 			free = get_fork(forks, id + 1, 1, lock);
 		else if (hand > 0)
