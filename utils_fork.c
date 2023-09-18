@@ -19,17 +19,6 @@ int last_id(t_fork *lst)
     return (id);
 }
 
-t_phil *last_phil(t_phil *lst)
-{
-    while (lst)
-    {
-        if (!lst->next)
-            return (lst);
-        lst = lst->next;
-    }
-    return (NULL);
-}
-
 t_fork *last_fork(t_fork *lst)
 {
     while (lst)
@@ -41,7 +30,7 @@ t_fork *last_fork(t_fork *lst)
     return (NULL);
 }
 
-t_phil *bfr_this(t_phil *lst, t_phil *this)
+t_fork *bfr_fork(t_fork *lst, t_fork *this)
 {
     while (lst->next)
     {
@@ -49,5 +38,5 @@ t_phil *bfr_this(t_phil *lst, t_phil *this)
             return (lst);
         lst = lst->next;
     }
-    return (NULL);
+    return (lst);
 }

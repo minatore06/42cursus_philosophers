@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-Wall -Wextra -Werror
 NAME=philo
 
-FILES=main.c ft_atoi.c forks.c utils.c get.c
+FILES=main.c ft_atoi.c forks.c utils_phil.c utils_fork.c get.c
 OBJECTS=$(FILES:.c=.o)
 
 all: $(NAME)

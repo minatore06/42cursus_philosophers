@@ -61,6 +61,7 @@ int		last_id(t_fork *lst);
 t_phil	*last_phil(t_phil *lst);
 t_fork	*last_fork(t_fork *lst);
 t_phil	*bfr_this(t_phil *lst, t_phil *this);
+t_fork  *bfr_fork(t_fork *lst, t_fork *this);
 t_fork	*get_next(t_fork *lst, t_fork *el);
 void	*live_phil(void	*args);
 void	output(int id, int action, t_info *info);

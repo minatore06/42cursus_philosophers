@@ -61,8 +61,10 @@ int	is_dead(long int last_meal, int ttd, t_phil *phil)
 
 	if (get_dead(phil->common->dead, &phil->common->locks->dead))
 		return (-1);
-	gettimeofday(&now, NULL);
 	pthread_mutex_lock(&phil->last_meal_lock);
+	gettimeofday(&now, NULL);
+	/* if (((now.tv_sec * 1000 + now.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000)) >= 740)
+		printf("Boia %d %ld\n", phil->id, ((now.tv_sec * 1000 + now.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000))); */
 	if (last_meal && (now.tv_sec * 1000 + now.tv_usec / 1000) - last_meal >= ttd)
 	{
 		printf("%ld ~ %ld ~ %d\n", (now.tv_sec * 1000 + now.tv_usec / 1000), last_meal, ttd);
@@ -129,6 +131,7 @@ void	*becchino(void *phils)
 			phil = phil->next;
 		}
 		phil = phils;
+		usleep(1000);
 	}
 	printf("sus\n");
 /* 	phil = phils;
@@ -188,11 +191,11 @@ void	*live_phil(void	*args)
 			return (info);
 		} */
 		output(info->id, 0, info->common);
-		output(info->id, 1, info->common);
 		pthread_mutex_lock(&info->last_meal_lock);
 		gettimeofday(&last_meal, NULL);
 		info->last_meal = last_meal.tv_sec * 1000 + last_meal.tv_usec / 1000;
 		pthread_mutex_unlock(&info->last_meal_lock);
+		output(info->id, 1, info->common);
 		usleep(info->tte * 1000);
 		manage_forks(1, 0, info->id, &info->common->locks->forks);
 		/* if (info->common->dead)
@@ -244,7 +247,7 @@ int main(int argc, char *argv[])
 	}
 	//phils = tmp;
 	phils = last_phil(tmp);
-	pthread_create(&bcn, NULL, &becchino, phils);
+	pthread_create(&bcn, NULL, &becchino, tmp);
 	while (phils)
 	{
 		pthread_join(phils->thread, NULL);

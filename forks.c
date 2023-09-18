@@ -60,10 +60,19 @@ int	get_fork(t_fork *forks, int id, int has_fork, pthread_mutex_t *lock)
 	{
 		if (fork->id == id)
 		{
- 			if (islast_fork(forks) && !has_fork)
+/*  			if (islast_fork(forks) && !has_fork)
+				return (1); */
+/*   			if (!islast_fork(forks) && !has_fork && !get_next(forks, fork)->free)
+				return (1); */
+			if (!islast_fork(forks) && !has_fork && !bfr_fork(forks, fork)->free)
 				return (1);
- 			if (!has_fork && !get_next(forks, fork)->free)
-				return (1);
+/* 			if (fork->free)
+			{
+				pthread_mutex_lock(&fork->lock);
+				fork->free = 0;
+				pthread_mutex_unlock(lock);
+				return (0);
+			} */
 			pthread_mutex_unlock(lock);
 			pthread_mutex_lock(&fork->lock);
 			pthread_mutex_lock(lock);
