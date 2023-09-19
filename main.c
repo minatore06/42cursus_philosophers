@@ -236,6 +236,8 @@ int main(int argc, char *argv[])
 	if (argc < 5 || argc > 6)
 		return (0);
 	phils = philosophers_born(argv);
+	if (!phils)
+		return (0);
 	output(0, -1, NULL);
 	manage_forks(0, 0, ft_atoi(argv[1]), NULL);
 	tmp = phils;

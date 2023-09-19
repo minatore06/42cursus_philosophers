@@ -40,3 +40,10 @@ t_fork *bfr_fork(t_fork *lst, t_fork *this)
     }
     return (lst);
 }
+
+int is_one_fork(t_fork *lst)
+{
+    if (!lst->next)
+        return (1);
+    return (0);
+}

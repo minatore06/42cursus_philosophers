@@ -63,6 +63,7 @@ t_fork	*last_fork(t_fork *lst);
 t_phil	*bfr_this(t_phil *lst, t_phil *this);
 t_fork  *bfr_fork(t_fork *lst, t_fork *this);
 t_fork	*get_next(t_fork *lst, t_fork *el);
+int     is_one_fork(t_fork *lst);
 void	*live_phil(void	*args);
 void	output(int id, int action, t_info *info);
 int		get_fork(t_fork *forks, int id, int has_fork, pthread_mutex_t *lock);

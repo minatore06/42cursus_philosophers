@@ -53,18 +53,24 @@ int	get_fork(t_fork *forks, int id, int has_fork, pthread_mutex_t *lock)
 {
 	t_fork	*fork;
 
-	if (id > last_id(forks))
+	if (id > last_id(forks) && !is_one_fork(forks))
 		id = 1;
 	fork = forks;
 	while (fork)
 	{
 		if (fork->id == id)
 		{
-/*  			if (islast_fork(forks) && !has_fork)
+  			if (!(last_fork(forks)->id % 2) && islast_fork(forks) && !has_fork)
+				return (1);
+			if (!(last_fork(forks)->id % 2) && !has_fork && !get_next(forks, fork)->free)
+				return (1);
+/* 			if (!(last_fork(forks)->id % 2) && !has_fork && !bfr_fork(forks, fork)->free)
+				return (1); */
+/* 			if (last_fork(forks)->id % 2 && islast_fork(forks) && !has_fork)
 				return (1); */
 /*   			if (!islast_fork(forks) && !has_fork && !get_next(forks, fork)->free)
 				return (1); */
-			if (!islast_fork(forks) && !has_fork && !bfr_fork(forks, fork)->free)
+			if ((last_fork(forks)->id % 2) && !islast_fork(forks) && !has_fork && !bfr_fork(forks, fork)->free)
 				return (1);
 /* 			if (fork->free)
 			{
@@ -80,7 +86,7 @@ int	get_fork(t_fork *forks, int id, int has_fork, pthread_mutex_t *lock)
 			pthread_mutex_unlock(lock);
 			return (0);
 		}
-		fork = get_next(forks, fork);
+		fork = fork->next;
 	}
 	return (1);
 }
