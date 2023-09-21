@@ -1,6 +1,17 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   forks.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: scaiazzo <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/09/21 17:07:46 by scaiazzo          #+#    #+#             */
+/*   Updated: 2023/09/21 17:07:51 by scaiazzo         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 #include "philosophers.h"
 
-t_fork	*make_forks(int	n)
+t_fork	*make_forks(int n)
 {
 	t_fork	*forks;
 	t_fork	*el;
@@ -40,15 +51,6 @@ int	islast_fork(t_fork *forks)
 	return (0);
 }
 
-/* void	print_forks(t_fork *forks)
-{
-	while (forks)
-	{
-		printf("Fork %d, free %d\n", forks->id, forks->free);
-		forks = forks->next;
-	}
-} */
-
 int	get_fork(t_fork *forks, int id, int has_fork, pthread_mutex_t *lock)
 {
 	t_fork	*fork;
@@ -60,25 +62,22 @@ int	get_fork(t_fork *forks, int id, int has_fork, pthread_mutex_t *lock)
 	{
 		if (fork->id == id)
 		{
-  			if (!(last_fork(forks)->id % 2) && islast_fork(forks) && has_fork <= 0)
+			if (!(last_fork(forks)->id % 2) && islast_fork(forks)
+				&& has_fork <= 0)
 				return (1);
 /* 			if (!(last_fork(forks)->id % 2) && has_fork <= 0 && !get_next(forks, fork)->free)
 				return (1); */
-			if (!(last_fork(forks)->id % 2) && !has_fork && !bfr_fork(forks, fork)->free)
+			if (!(last_fork(forks)->id % 2) && !has_fork
+				&& !bfr_fork(forks, fork)->free)
 				return (1);
 /* 			if (last_fork(forks)->id % 2 && islast_fork(forks) && !has_fork)
 				return (1); */
-  			if (!islast_fork(forks) && has_fork <= 0 && !get_next(forks, fork)->free)
+			if (!islast_fork(forks) && has_fork <= 0
+				&& !get_next(forks, fork)->free)
 				return (1);
-			if ((last_fork(forks)->id % 2) && !islast_fork(forks) && !has_fork && !bfr_fork(forks, fork)->free)
+			if ((last_fork(forks)->id % 2) && !islast_fork(forks) && !has_fork
+				&& !bfr_fork(forks, fork)->free)
 				return (1);
-/* 			if (fork->free)
-			{
-				pthread_mutex_lock(&fork->lock);
-				fork->free = 0;
-				pthread_mutex_unlock(lock);
-				return (0);
-			} */
 			fork->free = 0;
 			pthread_mutex_unlock(lock);
 			pthread_mutex_lock(&fork->lock);
@@ -114,25 +113,13 @@ void	leave_forks(t_fork *forks, int id)
 int	manage_forks(int action, int hand, int id, pthread_mutex_t *lock)
 {
 	static t_fork	*forks;
-	// t_fork	*fork;
-    int             free;
+	int				free;
 
 	if (!hand && !action)
 	{
 		forks = make_forks(id);
 		return (0);
 	}
-/* 	if (id < 0)
-	{
-		fork = forks;
-		while (fork)
-		{
-			fork->free = 1;
-			pthread_mutex_unlock(&fork->lock);
-			fork = fork->next;
-		}
-		return (0);
-	} */
 	free = 1;
 	pthread_mutex_lock(lock);
 	if (action < 0)
@@ -145,7 +132,6 @@ int	manage_forks(int action, int hand, int id, pthread_mutex_t *lock)
 			free = get_fork(forks, id, 0, lock);
 		else
 			free = get_fork(forks, id, -1, lock);
-
 	}
 	else if (action > 0)
 		leave_forks(forks, id);

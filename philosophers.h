@@ -57,6 +57,7 @@ typedef struct  s_philosophers
 
 
 int		get_dead(int dead, pthread_mutex_t *lock);
+long	get_time();
 int		ft_atoi(char *str);
 int		last_id(t_fork *lst);
 t_phil	*last_phil(t_phil *lst);
