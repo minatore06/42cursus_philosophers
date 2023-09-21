@@ -20,37 +20,38 @@
 
 typedef struct s_fork
 {
-    int     id;
-    int     free;
-    pthread_mutex_t lock;
-    void    *next;
+	int	 id;
+	int	 free;
+	pthread_mutex_t lock;
+	void	*next;
 }t_fork;
 
 typedef struct s_locks
 {
-    pthread_mutex_t output;
-    pthread_mutex_t forks;
-    pthread_mutex_t dead;
+	pthread_mutex_t output;
+	pthread_mutex_t forks;
+	pthread_mutex_t dead;
+	pthread_mutex_t	eating_info;
 }t_locks;
 
 typedef struct  s_info
 {
-    t_locks     *locks;
-    int         dead;
+	t_locks			*locks;
+	int				dead;
+	int				phil_eating;
 }t_info;
 
 typedef struct  s_philosophers
 {
-    int				id;
-    int				ttd;
-    int				tte;
-    int				tts;
-    int				n_eat;
-    pthread_mutex_t	n_eat_lock;
-    long int		last_meal;
-    pthread_mutex_t	last_meal_lock;
-    pthread_t		thread;
-    t_info			*common;
+	int				id;
+	int				ttd;
+	int				tte;
+	int				tts;
+	int				n_eat;
+	long int		last_meal;
+	pthread_mutex_t	last_meal_lock;
+	pthread_t		thread;
+	t_info			*common;
 	void			*next;
 }t_phil;
 
@@ -63,7 +64,7 @@ t_fork	*last_fork(t_fork *lst);
 t_phil	*bfr_this(t_phil *lst, t_phil *this);
 t_fork  *bfr_fork(t_fork *lst, t_fork *this);
 t_fork	*get_next(t_fork *lst, t_fork *el);
-int     is_one_fork(t_fork *lst);
+int		is_one_fork(t_fork *lst);
 void	*live_phil(void	*args);
 void	output(int id, int action, t_info *info);
 int		get_fork(t_fork *forks, int id, int has_fork, pthread_mutex_t *lock);

@@ -60,16 +60,16 @@ int	get_fork(t_fork *forks, int id, int has_fork, pthread_mutex_t *lock)
 	{
 		if (fork->id == id)
 		{
-  			if (!(last_fork(forks)->id % 2) && islast_fork(forks) && !has_fork)
+  			if (!(last_fork(forks)->id % 2) && islast_fork(forks) && has_fork <= 0)
 				return (1);
-			if (!(last_fork(forks)->id % 2) && !has_fork && !get_next(forks, fork)->free)
-				return (1);
-/* 			if (!(last_fork(forks)->id % 2) && !has_fork && !bfr_fork(forks, fork)->free)
+/* 			if (!(last_fork(forks)->id % 2) && has_fork <= 0 && !get_next(forks, fork)->free)
 				return (1); */
+			if (!(last_fork(forks)->id % 2) && !has_fork && !bfr_fork(forks, fork)->free)
+				return (1);
 /* 			if (last_fork(forks)->id % 2 && islast_fork(forks) && !has_fork)
 				return (1); */
-/*   			if (!islast_fork(forks) && !has_fork && !get_next(forks, fork)->free)
-				return (1); */
+  			if (!islast_fork(forks) && has_fork <= 0 && !get_next(forks, fork)->free)
+				return (1);
 			if ((last_fork(forks)->id % 2) && !islast_fork(forks) && !has_fork && !bfr_fork(forks, fork)->free)
 				return (1);
 /* 			if (fork->free)
@@ -79,6 +79,7 @@ int	get_fork(t_fork *forks, int id, int has_fork, pthread_mutex_t *lock)
 				pthread_mutex_unlock(lock);
 				return (0);
 			} */
+			fork->free = 0;
 			pthread_mutex_unlock(lock);
 			pthread_mutex_lock(&fork->lock);
 			pthread_mutex_lock(lock);
@@ -142,6 +143,9 @@ int	manage_forks(int action, int hand, int id, pthread_mutex_t *lock)
 			free = get_fork(forks, id + 1, 1, lock);
 		else if (hand > 0)
 			free = get_fork(forks, id, 0, lock);
+		else
+			free = get_fork(forks, id, -1, lock);
+
 	}
 	else if (action > 0)
 		leave_forks(forks, id);

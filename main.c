@@ -27,9 +27,11 @@ t_phil  *philosophers_born(char *argv[])
 	pthread_mutex_init(&locks->output, NULL);
 	pthread_mutex_init(&locks->forks, NULL);
 	pthread_mutex_init(&locks->dead, NULL);
+	pthread_mutex_init(&locks->eating_info, NULL);
 	common = malloc(sizeof(t_info));
 	common->locks = locks;
 	common->dead = 0;
+	common->phil_eating = ft_atoi(argv[1]);
 	while (i < ft_atoi(argv[1]))
 	{
 		el = malloc(sizeof(t_phil));
@@ -38,7 +40,6 @@ t_phil  *philosophers_born(char *argv[])
 		el->tte = ft_atoi(argv[3]);
 		el->tts = ft_atoi(argv[4]);
 		el->last_meal = 0;
-		pthread_mutex_init(&el->n_eat_lock, NULL);
 		pthread_mutex_init(&el->last_meal_lock, NULL);
 		el->next = NULL;
 		if (argv[5])
@@ -120,14 +121,15 @@ void	*becchino(void *phils)
 		{
 			if (is_dead(phil->last_meal, phil->ttd, phil))
 				break ;
-			pthread_mutex_lock(&phil->n_eat_lock);
-			if (!phil->n_eat)
+			pthread_mutex_lock(&phil->common->locks->eating_info);
+			if (!phil->common->phil_eating)
 			{
 				pthread_mutex_lock(&phil->common->locks->dead);
 					phil->common->dead = 1;
 				pthread_mutex_unlock(&phil->common->locks->dead);
+				break ;
 			}
-			pthread_mutex_unlock(&phil->n_eat_lock);
+			pthread_mutex_unlock(&phil->common->locks->eating_info);
 			phil = phil->next;
 		}
 		phil = phils;
@@ -156,6 +158,8 @@ void	*live_phil(void	*args)
 {
 	t_phil			*info = (t_phil *)args;
 	struct timeval	last_meal;
+	struct timeval	now;
+	long			now_time;
 
 	pthread_mutex_lock(&info->last_meal_lock);
 	gettimeofday(&last_meal, NULL);
@@ -167,16 +171,19 @@ void	*live_phil(void	*args)
 			return (info); */
  		while (manage_forks(-1, 1, info->id, &info->common->locks->forks))
 		{
+			gettimeofday(&now, NULL);
+			now_time = now.tv_sec * 1000 + now.tv_usec / 1000;
+			if (now_time- info->last_meal > info->tte / 10)
+			{
+				if (!manage_forks(-1, 0, info->id, &info->common->locks->forks))
+					break ;
+			}
 			if (get_dead(info->common->dead, &info->common->locks->dead))
 			{
 				return (info);
 			}
 		}
 		output(info->id, 0, info->common);
-		pthread_mutex_lock(&info->n_eat_lock);
-		if (info->n_eat)
-			info->n_eat++;
-		pthread_mutex_unlock(&info->n_eat_lock);
 		while (manage_forks(-1, -1, info->id, &info->common->locks->forks))
 		{
  			if (get_dead(info->common->dead, &info->common->locks->dead))
@@ -191,6 +198,14 @@ void	*live_phil(void	*args)
 			return (info);
 		} */
 		output(info->id, 0, info->common);
+		if (info->n_eat)
+		{
+			info->n_eat++;
+			pthread_mutex_lock(&info->common->locks->eating_info);
+			if (!info->n_eat)
+				info->common->phil_eating--;
+			pthread_mutex_unlock(&info->common->locks->eating_info);
+		}
 		pthread_mutex_lock(&info->last_meal_lock);
 		gettimeofday(&last_meal, NULL);
 		info->last_meal = last_meal.tv_sec * 1000 + last_meal.tv_usec / 1000;
