@@ -59,6 +59,7 @@ int		get_dead(int dead, pthread_mutex_t *lock);
 long	get_time(void);
 int		ft_atoi(char *str);
 int		last_id(t_fork *lst);
+int		islast_fork(t_fork *forks);
 t_phil	*last_phil(t_phil *lst);
 t_fork	*last_fork(t_fork *lst);
 t_phil	*bfr_this(t_phil *lst, t_phil *this);

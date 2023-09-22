@@ -1,22 +1,15 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils_fork.c                                       :+:      :+:    :+:   */
+/*   utils_fork2.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: scaiazzo <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/09/21 17:08:08 by scaiazzo          #+#    #+#             */
-/*   Updated: 2023/09/21 17:08:13 by scaiazzo         ###   ########.fr       */
+/*   Created: 2023/09/22 17:50:40 by scaiazzo          #+#    #+#             */
+/*   Updated: 2023/09/22 17:50:42 by scaiazzo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "philosophers.h"
-
-t_fork	*get_next(t_fork *lst, t_fork *el)
-{
-	if (el->next)
-		return (el->next);
-	return (lst);
-}
 
 int	last_id(t_fork *lst)
 {
@@ -30,26 +23,20 @@ int	last_id(t_fork *lst)
 	return (id);
 }
 
-t_fork	*last_fork(t_fork *lst)
+int	islast_fork(t_fork *forks)
 {
-	while (lst)
-	{
-		if (!lst->next)
-			return (lst);
-		lst = lst->next;
-	}
-	return (NULL);
-}
+	int	count;
 
-t_fork	*bfr_fork(t_fork *lst, t_fork *this)
-{
-	while (lst->next)
+	count = 0;
+	while (forks)
 	{
-		if (lst->next == this)
-			return (lst);
-		lst = lst->next;
+		if (forks->free)
+			count++;
+		forks = forks->next;
 	}
-	return (lst);
+	if (count == 1)
+		return (1);
+	return (0);
 }
 
 int	is_one_fork(t_fork *lst)

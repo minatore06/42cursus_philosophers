@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 #include "philosophers.h"
 
-t_phil	*make_phils(t_phil *phils, t_info *common, int i)
+t_phil	*make_phils(t_phil *phils, t_info *common, char *argv[], int i)
 {
 	t_phil	*el;
 
@@ -55,7 +55,7 @@ t_phil	*philosophers_born(char *argv[])
 	common->locks = locks;
 	common->dead = 0;
 	common->phil_eating = ft_atoi(argv[1]);
-	return (make_phils(NULL, common, 0));
+	return (make_phils(NULL, common, argv, 0));
 }
 
 void	free_phils(t_phil *phils)
@@ -72,14 +72,15 @@ void	free_phils(t_phil *phils)
 	{
 		phil = phils;
 		phils = phils->next;
-		pthread_mutex_destroy(&phils->last_meal_lock);
+		pthread_mutex_destroy(&phil->last_meal_lock);
 		free(phil);
 	}
 }
 
-void	start_all(char *str, t_phil *phils, pthread_t bcn)
+pthread_t	start_all(char *str, t_phil *phils)
 {
 	t_phil		*tmp;
+	pthread_t	bcn;
 
 	tmp = phils;
 	output(0, -1, NULL);
@@ -90,6 +91,7 @@ void	start_all(char *str, t_phil *phils, pthread_t bcn)
 		phils = phils->next;
 	}
 	pthread_create(&bcn, NULL, &becchino, tmp);
+	return (bcn);
 }
 
 int	main(int argc, char *argv[])
@@ -103,16 +105,19 @@ int	main(int argc, char *argv[])
 	phils = philosophers_born(argv);
 	if (!phils)
 		return (0);
-	start_all(argv[1], phils, bcn);
-	phils = last_phil(tmp);
-	while (phils)
+	bcn = start_all(argv[1], phils);
+	tmp = last_phil(phils);
+	while (tmp)
 	{
-		pthread_join(phils->thread, NULL);
-		printf("Phil %d is dead!!!!!!!!!!!!!!!!!!!!!!!\n", phils->id);
-		phils = bfr_this(tmp, phils);
+		printf("Waiting for %d !!!!!!!!!\n", tmp->id);
+		pthread_join(tmp->thread, NULL);
+		printf("Phil %d is dead!!!!!!!!!!!!!!!!!!!!!!!\n", tmp->id);
+		tmp = bfr_this(phils, tmp);
+		if (tmp)
+			manage_forks(1, 0, tmp->id, &tmp->common->locks->forks);
 	}
 	pthread_join(bcn, NULL);
 	printf("I'm dead!!!!!!!!!!!!!!!!!!!!!!!\n");
-	free_phils(tmp);
+	free_phils(phils);
 	return (0);
 }
