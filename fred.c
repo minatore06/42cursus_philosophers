@@ -23,13 +23,13 @@ int	eating_pasta(t_phil *info)
 			if (!manage_forks(-1, 0, info->id, &info->common->locks->forks))
 				break ;
 		}
-		if (get_dead(info->common->dead, &info->common->locks->dead))
+		if (get_dead(info->common, &info->common->locks->dead))
 			return (1);
 	}
 	output(info->id, 0, info->common);
 	while (manage_forks(-1, -1, info->id, &info->common->locks->forks))
 	{
-		if (get_dead(info->common->dead, &info->common->locks->dead))
+		if (get_dead(info->common, &info->common->locks->dead))
 		{
 			manage_forks(1, 0, info->id, &info->common->locks->forks);
 			return (1);
@@ -64,12 +64,11 @@ void	*live_phil(void	*args)
 	pthread_mutex_lock(&info->last_meal_lock);
 	info->last_meal = get_time();
 	pthread_mutex_unlock(&info->last_meal_lock);
-	while (!get_dead(info->common->dead, &info->common->locks->dead))
+	while (!get_dead(info->common, &info->common->locks->dead))
 	{
 		if (eating_pasta(info))
 			return (info);
 		update_info(info);
-		manage_forks(1, 0, info->id, &info->common->locks->forks);
 		manage_forks(1, 1, info->id, &info->common->locks->forks);
 		output(info->id, 2, info->common);
 		usleep(info->tts * 1000);

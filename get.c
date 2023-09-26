@@ -11,12 +11,12 @@
 /* ************************************************************************** */
 #include "philosophers.h"
 
-int	get_dead(int dead, pthread_mutex_t *lock)
+int	get_dead(t_info *common, pthread_mutex_t *lock)
 {
 	int	result;
 
 	pthread_mutex_lock(lock);
-	result = dead;
+	result = common->dead;
 	pthread_mutex_unlock(lock);
 	return (result);
 }

@@ -55,7 +55,7 @@ typedef struct s_philosophers
 	void			*next;
 }t_phil;
 
-int		get_dead(int dead, pthread_mutex_t *lock);
+int		get_dead(t_info *common, pthread_mutex_t *lock);
 long	get_time(void);
 int		ft_atoi(char *str);
 int		last_id(t_fork *lst);
@@ -69,7 +69,7 @@ int		is_one_fork(t_fork *lst);
 void	*live_phil(void	*args);
 void	output(int id, int action, t_info *info);
 int		get_fork(t_fork *forks, int id, int has_fork, pthread_mutex_t *lock);
-void	leave_forks(t_fork *forks, int id);
+void	leave_forks(t_fork *forks, int id, int full);
 t_fork	*make_forks(int n);
 int		manage_forks(int action, int hand, int id, pthread_mutex_t *lock);
 t_phil	*philosophers_born(char *argv[]);

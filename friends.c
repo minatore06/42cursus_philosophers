@@ -11,13 +11,15 @@
 /* ************************************************************************** */
 #include "philosophers.h"
 
-int	is_dead(long int last_meal, int ttd, t_phil *phil)
+int	is_dead(int ttd, t_phil *phil)
 {
-	long	now;
+	long		now;
+	long int	last_meal;
 
-	if (get_dead(phil->common->dead, &phil->common->locks->dead))
+	if (get_dead(phil->common, &phil->common->locks->dead))
 		return (-1);
 	pthread_mutex_lock(&phil->last_meal_lock);
+	last_meal = phil->last_meal;
 	now = get_time();
 	if (last_meal && now - last_meal >= ttd)
 	{
@@ -44,7 +46,7 @@ void	output(int id, int action, t_info *info)
 		return ;
 	}
 	pthread_mutex_lock(&info->locks->output);
-	if (!get_dead(info->dead, &info->locks->dead))
+ 	if (!get_dead(info, &info->locks->dead))
 	{
 		now = get_time();
 		printf("%ld %d ", (now - start), id);
@@ -58,7 +60,7 @@ void	output(int id, int action, t_info *info)
 			printf("is thinking\n");
 		else if (action == 4)
 			printf("died\n");
-	}
+ 	}
 	pthread_mutex_unlock(&info->locks->output);
 }
 
@@ -67,11 +69,11 @@ void	*becchino(void *phils)
 	t_phil	*phil;
 
 	phil = phils;
-	while (!get_dead(phil->common->dead, &phil->common->locks->dead))
+	while (!get_dead(phil->common, &phil->common->locks->dead))
 	{
 		while (phil)
 		{
-			if (is_dead(phil->last_meal, phil->ttd, phil))
+			if (is_dead(phil->ttd, phil))
 				break ;
 			pthread_mutex_lock(&phil->common->locks->eating_info);
 			if (!phil->common->phil_eating)

@@ -102,6 +102,9 @@ int	main(int argc, char *argv[])
 
 	if (argc < 5 || argc > 6)
 		return (0);
+	if (ft_atoi(argv[1]) < 1 || ft_atoi(argv[2]) < 0 || ft_atoi(argv[3]) < 0
+		|| ft_atoi(argv[4]) < 0 || (argv[5] && ft_atoi(argv[5]) < 0))
+		return (0);
 	phils = philosophers_born(argv);
 	if (!phils)
 		return (0);
