@@ -21,7 +21,7 @@ int	is_dead(long int last_meal, int ttd, t_phil *phil)
 	now = get_time();
 	if (last_meal && now - last_meal >= ttd)
 	{
-		printf("%ld ~ %ld ~ %d\n", now, last_meal, ttd);
+		//printf("%ld ~ %ld ~ %d\n", now, last_meal, ttd);
 		pthread_mutex_unlock(&phil->last_meal_lock);
 		output(phil->id, 4, phil->common);
 		pthread_mutex_lock(&phil->common->locks->dead);
@@ -87,6 +87,6 @@ void	*becchino(void *phils)
 		phil = phils;
 		usleep(1000);
 	}
-	manage_forks(1, 0, phil->id, &phil->common->locks->forks);
+	//manage_forks(1, 0, phil->id, &phil->common->locks->forks);
 	return (NULL);
 }

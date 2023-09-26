@@ -109,15 +109,15 @@ int	main(int argc, char *argv[])
 	tmp = last_phil(phils);
 	while (tmp)
 	{
-		printf("Waiting for %d !!!!!!!!!\n", tmp->id);
+		//printf("Waiting for %d !!!!!!!!!\n", tmp->id);
 		pthread_join(tmp->thread, NULL);
-		printf("Phil %d is dead!!!!!!!!!!!!!!!!!!!!!!!\n", tmp->id);
+		//printf("Phil %d is dead!!!!!!!!!!!!!!!!!!!!!!!\n", tmp->id);
 		tmp = bfr_this(phils, tmp);
-		if (tmp)
-			manage_forks(1, 0, tmp->id, &tmp->common->locks->forks);
+/* 		if (tmp)
+			manage_forks(1, 0, tmp->id, &tmp->common->locks->forks); */
 	}
 	pthread_join(bcn, NULL);
-	printf("I'm dead!!!!!!!!!!!!!!!!!!!!!!!\n");
+	//printf("I'm dead!!!!!!!!!!!!!!!!!!!!!!!\n");
 	free_phils(phils);
 	return (0);
 }

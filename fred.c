@@ -70,6 +70,7 @@ void	*live_phil(void	*args)
 			return (info);
 		update_info(info);
 		manage_forks(1, 0, info->id, &info->common->locks->forks);
+		manage_forks(1, 1, info->id, &info->common->locks->forks);
 		output(info->id, 2, info->common);
 		usleep(info->tts * 1000);
 		output(info->id, 3, info->common);

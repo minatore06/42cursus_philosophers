@@ -46,6 +46,8 @@ int	mega_check(t_fork *forks, t_fork *fork, int has_fork)
 	if (!islast_fork(forks) && !has_fork
 		&& !bfr_fork(forks, fork)->free)
 		return (1);
+	if (!fork->free)
+		return (1);
 	return (0);
 }
 
@@ -86,8 +88,8 @@ void	leave_forks(t_fork *forks, int id)
 		{
 			fork->free = 1;
 			pthread_mutex_unlock(&fork->lock);
-			get_next(forks, fork)->free = 1;
-			pthread_mutex_unlock(&get_next(forks, fork)->lock);
+/* 			get_next(forks, fork)->free = 1;
+			pthread_mutex_unlock(&get_next(forks, fork)->lock); */
 			return ;
 		}
 		fork = fork->next;
@@ -117,7 +119,7 @@ int	manage_forks(int action, int hand, int id, pthread_mutex_t *lock)
 			free = get_fork(forks, id, -1, lock);
 	}
 	else if (action > 0)
-		leave_forks(forks, id);
+		leave_forks(forks, id + hand);
 	if (free)
 		pthread_mutex_unlock(lock);
 	return (free);
