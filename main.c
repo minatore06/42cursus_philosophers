@@ -3,12 +3,13 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: scaiazzo <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: scaiazzo <scaiazzo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 14:47:11 by scaiazzo          #+#    #+#             */
-/*   Updated: 2023/03/15 14:47:14 by scaiazzo         ###   ########.fr       */
+/*   Updated: 2023/09/27 11:51:17 by scaiazzo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 #include "philosophers.h"
 
 t_phil	*make_phils(t_phil *phils, t_info *common, char *argv[], int i)
@@ -112,15 +113,11 @@ int	main(int argc, char *argv[])
 	tmp = last_phil(phils);
 	while (tmp)
 	{
-		//printf("Waiting for %d !!!!!!!!!\n", tmp->id);
 		pthread_join(tmp->thread, NULL);
-		//printf("Phil %d is dead!!!!!!!!!!!!!!!!!!!!!!!\n", tmp->id);
 		tmp = bfr_this(phils, tmp);
-/* 		if (tmp)
-			manage_forks(1, 0, tmp->id, &tmp->common->locks->forks); */
 	}
 	pthread_join(bcn, NULL);
-	//printf("I'm dead!!!!!!!!!!!!!!!!!!!!!!!\n");
 	free_phils(phils);
+	manage_forks(0, 0, ft_atoi(argv[1]), NULL);
 	return (0);
 }

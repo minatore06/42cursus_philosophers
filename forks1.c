@@ -1,44 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   forks.c                                            :+:      :+:    :+:   */
+/*   forks1.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: scaiazzo <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: scaiazzo <scaiazzo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/21 17:07:46 by scaiazzo          #+#    #+#             */
-/*   Updated: 2023/09/21 17:07:51 by scaiazzo         ###   ########.fr       */
+/*   Updated: 2023/10/11 17:27:12 by scaiazzo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 #include "philosophers.h"
-
-t_fork	*make_forks(int n)
-{
-	t_fork	*forks;
-	t_fork	*el;
-	int		i;
-
-	forks = NULL;
-	i = 0;
-	while (i < n)
-	{
-		el = malloc(sizeof(t_fork));
-		el->free = 1;
-		pthread_mutex_init(&el->lock, NULL);
-		el->id = i + 1;
-		el->next = NULL;
-		if (!forks)
-			forks = el;
-		else
-			last_fork(forks)->next = el;
-		i++;
-	}
-	return (forks);
-}
 
 int	mega_check(t_fork *forks, t_fork *fork, int has_fork)
 {
-	if (!(last_fork(forks)->id % 2) && islast_fork(forks)
-		&& has_fork <= 0)
+	if ((!(last_fork(forks)->id % 2) || last_fork(forks)->id == 3)
+		&& islast_fork(forks) && has_fork <= 0)
 		return (1);
 	if (!islast_fork(forks) && has_fork <= 0
 		&& !get_next(forks, fork)->free)
@@ -88,7 +65,7 @@ void	leave_forks(t_fork *forks, int id, int full)
 			pthread_mutex_unlock(&fork->lock);
 			if (full)
 			{
-	 			get_next(forks, fork)->free = 1;
+				get_next(forks, fork)->free = 1;
 				pthread_mutex_unlock(&get_next(forks, fork)->lock);
 			}
 			return ;
@@ -103,7 +80,7 @@ int	manage_forks(int action, int hand, int id, pthread_mutex_t *lock)
 	int				free;
 
 	if (!hand && !action)
-		forks = make_forks(id);
+		forks = oppenheimer(id, forks);
 	if (!hand && !action)
 		return (0);
 	free = 1;

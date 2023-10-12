@@ -3,12 +3,13 @@
 /*                                                        :::      ::::::::   */
 /*   philosophers.h                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: scaiazzo <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: scaiazzo <scaiazzo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 14:46:36 by scaiazzo          #+#    #+#             */
-/*   Updated: 2023/03/15 14:47:02 by scaiazzo         ###   ########.fr       */
+/*   Updated: 2023/09/27 11:52:18 by scaiazzo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 #ifndef PHILOSOPHERS_H
 # define PHILOSOPHERS_H
 # include <stdlib.h>
@@ -70,7 +71,7 @@ void	*live_phil(void	*args);
 void	output(int id, int action, t_info *info);
 int		get_fork(t_fork *forks, int id, int has_fork, pthread_mutex_t *lock);
 void	leave_forks(t_fork *forks, int id, int full);
-t_fork	*make_forks(int n);
+t_fork	*oppenheimer(int id, t_fork *forks);
 int		manage_forks(int action, int hand, int id, pthread_mutex_t *lock);
 t_phil	*philosophers_born(char *argv[]);
 void	*becchino(void *phils);

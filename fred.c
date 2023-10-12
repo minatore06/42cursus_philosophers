@@ -3,12 +3,13 @@
 /*                                                        :::      ::::::::   */
 /*   fred.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: scaiazzo <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: scaiazzo <scaiazzo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/22 11:51:57 by scaiazzo          #+#    #+#             */
-/*   Updated: 2023/09/22 11:52:00 by scaiazzo         ###   ########.fr       */
+/*   Updated: 2023/10/11 15:29:52 by scaiazzo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 #include "philosophers.h"
 
 int	eating_pasta(t_phil *info)

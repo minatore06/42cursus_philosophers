@@ -1,14 +1,15 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   friend.c                                           :+:      :+:    :+:   */
+/*   friends.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: scaiazzo <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: scaiazzo <scaiazzo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/22 15:42:27 by scaiazzo          #+#    #+#             */
-/*   Updated: 2023/09/22 15:42:43 by scaiazzo         ###   ########.fr       */
+/*   Updated: 2023/09/27 11:50:53 by scaiazzo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 #include "philosophers.h"
 
 int	is_dead(int ttd, t_phil *phil)
@@ -23,7 +24,6 @@ int	is_dead(int ttd, t_phil *phil)
 	now = get_time();
 	if (last_meal && now - last_meal >= ttd)
 	{
-		//printf("%ld ~ %ld ~ %d\n", now, last_meal, ttd);
 		pthread_mutex_unlock(&phil->last_meal_lock);
 		output(phil->id, 4, phil->common);
 		pthread_mutex_lock(&phil->common->locks->dead);
@@ -46,7 +46,7 @@ void	output(int id, int action, t_info *info)
 		return ;
 	}
 	pthread_mutex_lock(&info->locks->output);
- 	if (!get_dead(info, &info->locks->dead))
+	if (!get_dead(info, &info->locks->dead))
 	{
 		now = get_time();
 		printf("%ld %d ", (now - start), id);
@@ -60,7 +60,7 @@ void	output(int id, int action, t_info *info)
 			printf("is thinking\n");
 		else if (action == 4)
 			printf("died\n");
- 	}
+	}
 	pthread_mutex_unlock(&info->locks->output);
 }
 
@@ -89,6 +89,5 @@ void	*becchino(void *phils)
 		phil = phils;
 		usleep(1000);
 	}
-	//manage_forks(1, 0, phil->id, &phil->common->locks->forks);
 	return (NULL);
 }
